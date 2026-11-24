@@ -1,99 +1,74 @@
 #include <stdio.h>
-#include <stdlib.h>
 
-#define MAX 5
+#define TAMANHO 5
 
-int fila[MAX];
-int inicio = 0;
-int fim = -1;
-int quantidade = 0;
+typedef struct {
+    int dados[TAMANHO];
+    int inicio;
+    int fim;
+    int quantidade;
+} Fila;
 
-int filaVazia() {
-    return quantidade == 0;
+void inicializar(Fila *f) {
+    f->inicio = 0;
+    f->fim = -1;
+    f->quantidade = 0;
 }
 
-int filaCheia() {
-    return quantidade == MAX;
-}
+int estaVazia(Fila *f) { return f->quantidade == 0; }
+int estaCheia(Fila *f) { return f->quantidade == TAMANHO; }
 
-void enfileirar(int valor) {
-    if (filaCheia()) {
-        printf("\nA fila esta cheia\n");
-    } else {
-        fim = (fim + 1) % MAX;
-        fila[fim] = valor;
-        quantidade++;
-
-        printf("\nElemento %d adicionado\n", valor);
+void enfileirar(Fila *f, int valor) {
+    if (estaCheia(f)) {
+        printf("Fila cheia: nao foi possivel inserir %d.\n", valor);
+        return;
     }
+    f->fim = (f->fim + 1) % TAMANHO;
+    f->dados[f->fim] = valor;
+    f->quantidade++;
+    printf("Inserido: %d\n", valor);
 }
 
-void desenfileirar() {
-    if (filaVazia()) {
-        printf("\nA fila esta vazia\n");
-    } else {
-        printf("\nElemento %d removido\n", fila[inicio]);
-
-        inicio = (inicio + 1) % MAX;
-        quantidade--;
+void desenfileirar(Fila *f) {
+    if (estaVazia(f)) {
+        printf("Fila vazia: nada para remover.\n");
+        return;
     }
+    printf("Removido: %d\n", f->dados[f->inicio]);
+    f->inicio = (f->inicio + 1) % TAMANHO;
+    f->quantidade--;
 }
 
-void mostrarFila() {
-    int i;
-    int posicao;
-
-    if (filaVazia()) {
-        printf("\nA fila esta vazia\n");
-    } else {
-        printf("\nElementos da fila:\n");
-
-        for (i = 0; i < quantidade; i++) {
-            posicao = (inicio + i) % MAX;
-            printf("%d ", fila[posicao]);
-        }
-
-        printf("\n");
+void exibir(Fila *f) {
+    if (estaVazia(f)) {
+        printf("Fila vazia.\n");
+        return;
     }
+    printf("Frente -> ");
+    for (int i = 0; i < f->quantidade; i++)
+        printf("%d ", f->dados[(f->inicio + i) % TAMANHO]);
+    printf("<- Retaguarda\n");
 }
 
-int main() {
-    int opcao;
-    int valor;
+int main(void) {
+    Fila fila;
+    inicializar(&fila);
 
-    do {
-        printf("\n -- MENU DA FILA -- \n");
-        printf("1 - Enfileirar\n");
-        printf("2 - Desenfileirar\n");
-        printf("3 - Mostrar fila\n");
-        printf("4 - Sair\n");
-        printf("Escolha a opcao: ");
-        scanf("%d", &opcao);
+    enfileirar(&fila, 10);
+    enfileirar(&fila, 20);
+    enfileirar(&fila, 30);
+    exibir(&fila);
 
-        switch (opcao) {
-            case 1:
-                printf("Digite o valor: ");
-                scanf("%d", &valor);
-                enfileirar(valor);
-                break;
+    printf("\nRemovendo um elemento:\n");
+    desenfileirar(&fila);
+    exibir(&fila);
 
-            case 2:
-                desenfileirar();
-                break;
+    printf("\nInserindo outro elemento:\n");
+    enfileirar(&fila, 40);
+    exibir(&fila);
 
-            case 3:
-                mostrarFila();
-                break;
-
-            case 4:
-                printf("\nEncerrando o programa\n");
-                break;
-
-            default:
-                printf("\nOpcao invalida\n");
-        }
-
-    } while (opcao != 4);
+    printf("Esta vazia? %s\n", estaVazia(&fila) ? "Sim" : "Nao");
+    printf("Esta cheia? %s\n", estaCheia(&fila) ? "Sim" : "Nao");
 
     return 0;
 }

@@ -1,91 +1,79 @@
 #include <stdio.h>
 
-#define MAX 100
+#define MAX 20
 
 typedef struct {
-    int chave;
-} Elemento;
+    int valores[MAX + 1]; /* Heap usa indices de 1 ate tamanho. */
+    int tamanho;
+} Heap;
 
-void subir(Elemento T[], int i) {
-    int j = i / 2;
+void trocar(int *a, int *b) {
+    int temp = *a;
+    *a = *b;
+    *b = temp;
+}
 
-    if (j >= 1) {
-        if (T[i].chave > T[j].chave) {
-            Elemento temp = T[i];
-            T[i] = T[j];
-            T[j] = temp;
-
-            subir(T, j);
-        }
+void subir(Heap *h, int i) {
+    while (i > 1 && h->valores[i] > h->valores[i / 2]) {
+        trocar(&h->valores[i], &h->valores[i / 2]);
+        i = i / 2;
     }
 }
 
-void descer(Elemento T[], int i, int n) {
-    int j = 2 * i;
+void descer(Heap *h, int i) {
+    int filho;
+    while (2 * i <= h->tamanho) {
+        filho = 2 * i;
 
-    while (j <= n) {
-        if (j < n && T[j + 1].chave > T[j].chave) {
-            j = j + 1;
-        }
+        if (filho + 1 <= h->tamanho &&
+            h->valores[filho + 1] > h->valores[filho])
+            filho++;
 
-        if (T[i].chave < T[j].chave) {
-            Elemento temp = T[i];
-            T[i] = T[j];
-            T[j] = temp;
+        if (h->valores[i] >= h->valores[filho]) break;
 
-            i = j;
-            j = 2 * i;
-        } else {
-            break;
-        }
+        trocar(&h->valores[i], &h->valores[filho]);
+        i = filho;
     }
 }
 
-void mostrar(Elemento T[], int n) {
-    int i;
+void inserir(Heap *h, int valor) {
+    if (h->tamanho == MAX) return;
+    h->valores[++h->tamanho] = valor;
+    subir(h, h->tamanho);
+}
 
-    for (i = 1; i <= n; i++) {
-        printf("%d ", T[i].chave);
-    }
-
+void exibir(Heap *h) {
+    printf("Heap: ");
+    for (int i = 1; i <= h->tamanho; i++)
+        printf("%d ", h->valores[i]);
     printf("\n");
 }
 
-int main() {
-    Elemento T[MAX];
-    int n = 9;
-    int i, pos, novaPrioridade;
+int removerMaior(Heap *h) {
+    if (h->tamanho == 0) return -1;
+    int maior = h->valores[1];
+    h->valores[1] = h->valores[h->tamanho--];
+    if (h->tamanho > 0) descer(h, 1);
+    return maior;
+}
 
-    int valores[] = {0, 92, 85, 90, 47, 31, 34, 20, 40, 46};
+int main(void) {
+    Heap heap = {{0}, 0};
 
-    for (i = 1; i <= n; i++) {
-        T[i].chave = valores[i];
-    }
+    inserir(&heap, 40);
+    inserir(&heap, 15);
+    inserir(&heap, 30);
+    inserir(&heap, 10);
+    inserir(&heap, 50);
+    inserir(&heap, 20);
 
-    printf("HEAP inicial: ");
-    mostrar(T, n);
+    printf("Heap depois das insercoes fixas:\n");
+    exibir(&heap);
 
-    printf("\nDigite a posicao que deseja alterar: ");
-    scanf("%d", &pos);
+    printf("Maior elemento removido: %d\n", removerMaior(&heap));
 
-    if (pos < 1 || pos > n) {
-        printf("Posicao invalida!\n");
-        return 1;
-    }
-
-    printf("Digite a nova prioridade: ");
-    scanf("%d", &novaPrioridade);
-
-    if (novaPrioridade > T[pos].chave) {
-        T[pos].chave = novaPrioridade;
-        subir(T, pos);
-    } else if (novaPrioridade < T[pos].chave) {
-        T[pos].chave = novaPrioridade;
-        descer(T, pos, n);
-    }
-
-    printf("\nHEAP resultante: ");
-    mostrar(T, n);
+    printf("Heap depois da remocao:\n");
+    exibir(&heap);
 
     return 0;
 }

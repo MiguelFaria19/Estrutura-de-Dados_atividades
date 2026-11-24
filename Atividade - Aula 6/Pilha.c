@@ -1,135 +1,61 @@
 #include <stdio.h>
-#include <stdlib.h>
 
-int pilhaVazia(int topo) {
-    return topo == -1;
-}
+#define TAMANHO 5
 
-int pilhaCheia(int topo, int capacidade) {
-    return topo == capacidade - 1;
-}
+typedef struct {
+    int dados[TAMANHO];
+    int topo;
+} Pilha;
 
-void inserir(int pilha[], int *topo, int capacidade, int valor) {
-    if (pilhaCheia(*topo, capacidade)) {
-        printf("pilha esta cheia \n");
+void inicializar(Pilha *p) { p->topo = -1; }
+int estaVazia(Pilha *p) { return p->topo == -1; }
+int estaCheia(Pilha *p) { return p->topo == TAMANHO - 1; }
+
+void push(Pilha *p, int valor) {
+    if (estaCheia(p)) {
+        printf("Pilha cheia: nao foi possivel inserir %d.\n", valor);
         return;
     }
-
-    (*topo)++;
-    pilha[*topo] = valor;
-    printf("elemento inserido\n");
+    p->dados[++p->topo] = valor;
+    printf("Inserido: %d\n", valor);
 }
 
-int remover(int pilha[], int *topo, int *valorRemovido) {
-    if (pilhaVazia(*topo)) {
-        printf("pilha esta vazia\n");
-        return 0;
-    }
-
-    *valorRemovido = pilha[*topo];
-    (*topo)--;
-    return 1;
-}
-
-void mostrarPilha(int pilha[], int topo) {
-    int i;
-
-    if (pilhaVazia(topo)) {
-        printf("pilha vazia\n");
+void pop(Pilha *p) {
+    if (estaVazia(p)) {
+        printf("Pilha vazia: nada para remover.\n");
         return;
     }
+    printf("Removido: %d\n", p->dados[p->topo--]);
+}
 
-    printf("elementos da pilha (topo para a base): ");
-    for (i = topo; i >= 0; i--) {
-        printf("%d ", pilha[i]);
+void exibir(Pilha *p) {
+    if (estaVazia(p)) {
+        printf("Pilha vazia.\n");
+        return;
     }
+    printf("Topo -> ");
+    for (int i = p->topo; i >= 0; i--) printf("%d ", p->dados[i]);
     printf("\n");
 }
 
-int main() {
-    int capacidade;
-    int topo = -1;
-    int valor;
-    int removido;
-    int i;
-    int *pilha;
+int main(void) {
+    Pilha pilha;
+    inicializar(&pilha);
 
-    printf("tamanho maximo da pilha: ");
-    if (scanf("%d", &capacidade) != 1 || capacidade < 1) {
-        printf("Informe um tamanho valido\n");
-        return 1;
-    }
+    push(&pilha, 10);
+    push(&pilha, 20);
+    push(&pilha, 30);
+    push(&pilha, 40);
 
-    pilha = malloc(capacidade * sizeof(int));
-    if (pilha == NULL) {
-        printf("erro ao alocar memoria\n");
-        return 1;
-    }
+    printf("\nPilha atual:\n");
+    exibir(&pilha);
 
-    printf("\ndigite %d elementos para a pilha:\n", capacidade - 1);
-    for (i = 0; i < capacidade - 1; i++) {
-        printf("elemento %d: ", i + 1);
-        if (scanf("%d", &valor) != 1) {
-            printf("valor invalido.\n");
-            free(pilha);
-            return 1;
-        }
-        inserir(pilha, &topo, capacidade, valor);
-    }
+    printf("\nRemovendo um elemento:\n");
+    pop(&pilha);
+    exibir(&pilha);
 
-    printf("\n-- PILHA INICIAL --\n");
-    mostrarPilha(pilha, topo);
+    printf("Esta vazia? %s\n", estaVazia(&pilha) ? "Sim" : "Nao");
+    printf("Esta cheia? %s\n", estaCheia(&pilha) ? "Sim" : "Nao");
 
-    if (pilhaVazia(topo)) {
-        printf("pilha esta vazia.\n");
-    } else {
-        printf("pilha nao esta vazia.\n");
-    }
-
-    if (pilhaCheia(topo, capacidade)) {
-        printf("pilha esta cheia\n");
-    } else {
-        printf("pilha nao esta cheia\n");
-    }
-
-    printf("\nvalor para inserir na pilha: ");
-    if (scanf("%d", &valor) != 1) {
-        printf("valor invalido.\n");
-        free(pilha);
-        return 1;
-    }
-
-    inserir(pilha, &topo, capacidade, valor);
-
-    printf("\n-- PILHA APOS A INSERCAO --\n");
-    mostrarPilha(pilha, topo);
-
-    if (pilhaCheia(topo, capacidade)) {
-        printf("pilha esta cheia.\n");
-    } else {
-        printf("pilha n esta cheia.\n");
-    }
-
-    printf("\n-- REMOCAO DE ELEMENTO --\n");
-    if (remover(pilha, &topo, &removido)) {
-        printf("elemento removido: %d\n", removido);
-    }
-
-    printf("\n-- PILHA APOS A REMOCAO --\n");
-    mostrarPilha(pilha, topo);
-
-    if (pilhaVazia(topo)) {
-        printf("pilha esta vazia\n");
-    } else {
-        printf("pilha n esta vazia\n");
-    }
-
-    if (pilhaCheia(topo, capacidade)) {
-        printf("pilha esta cheia.\n");
-    } else {
-        printf("pilha n esta cheia.\n");
-    }
-
-    free(pilha);
     return 0;
 }
